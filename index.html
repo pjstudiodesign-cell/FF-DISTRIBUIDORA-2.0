@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FF Distribuidora | Cardápio Digital</title>
+    <style>
+        body { 
+            font-family: -apple-system, sans-serif; 
+            background: linear-gradient(rgba(0,0,0,0.85), rgba(0,0,0,0.85)), url('logo.jpg'); 
+            background-size: cover; background-attachment: fixed; background-position: center;
+            margin: 0; padding-bottom: 420px; color: #fff; display: flex; flex-direction: column; align-items: center;
+        }
+        
+        .header-pj { 
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+            padding: 20px; text-align: center; border-bottom: 4px solid #ffcc00; width: 100%; z-index: 10;
+        }
+        
+        .logo-img { max-height: 80px; margin-bottom: 10px; cursor: pointer; }
+        .studio-text { color: #ffcc00; font-size: 1.2rem; font-weight: 800; text-transform: uppercase; }
+
+        .container { width: 95%; max-width: 600px; padding: 20px; margin-top: 20px; }
+
+        .tabs { 
+            display: flex; overflow-x: auto; gap: 10px; padding: 15px 10px; width: 100%; 
+            position: sticky; top: 0; background: rgba(0,0,0,0.95); z-index: 9;
+            scrollbar-width: thin; scrollbar-color: #ffcc00 #000; -webkit-overflow-scrolling: touch;
+        }
+        .tabs::-webkit-scrollbar { height: 4px; }
+        .tabs::-webkit-scrollbar-thumb { background: #ffcc00; border-radius: 10px; }
+
+        .tab-btn { 
+            padding: 8px 18px; border: 1px solid #ffcc00; border-radius: 20px; 
+            background: none; color: #ffcc00; cursor: pointer; white-space: nowrap; 
+            font-weight: bold; font-size: 0.9rem; flex-shrink: 0;
+        }
+        .tab-btn.active { background: #ffcc00; color: #000; }
+
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .card { 
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); 
+            border-radius: 15px; padding: 10px; text-align: center; backdrop-filter: blur(5px);
+            position: relative; transition: 0.3s;
+        }
+        
+        .card.pausado { opacity: 0.3; filter: grayscale(1); }
+        .card.pausado .qtd-container { display: none; }
+        .badge-pausado { position: absolute; top: 10px; right: 10px; background: red; color: white; padding: 3px 8px; border-radius: 5px; font-size: 0.6rem; font-weight: bold; }
+
+        .card img { width: 100%; height: 120px; object-fit: contain; border-radius: 10px; margin-bottom: 10px; }
+        .card h3 { font-size: 0.9rem; margin: 5px 0; color: #ffcc00; }
+        .card p { font-size: 0.8rem; color: #ccc; margin: 5px 0; }
+        .card .preco { font-weight: bold; font-size: 1.1rem; color: #fff; margin-bottom: 10px; }
+        
+        .qtd-container { display: flex; gap: 5px; margin-top: 10px; }
+        .input-qtd { width: 50px; background: #222; border: 1px solid #ffcc00; color: #fff; border-radius: 5px; text-align: center; font-weight: bold; }
+        .btn-add { background: #ffcc00; color: #000; border: none; padding: 8px; border-radius: 5px; font-weight: bold; cursor: pointer; flex: 1; font-size: 0.8rem; }
+
+        .btn-gerente { display: none; margin-top: 10px; width: 100%; padding: 5px; font-size: 0.7rem; font-weight: bold; border-radius: 5px; cursor: pointer; border: none; }
+        .modo-adm .btn-gerente { display: block; }
+
+        .footer-cart { position: fixed; bottom: 0; left: 0; right: 0; background: #111; border-top: 3px solid #ffcc00; padding: 20px; z-index: 100; }
+        .input-group { margin-bottom: 10px; width: 100%; }
+        .input-group label { display: block; font-size: 0.75rem; margin-bottom: 4px; color: #ffcc00; font-weight: bold; }
+        .input-group input, .input-group select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #444; background: #222; color: #fff; box-sizing: border-box; font-size: 0.95rem; }
+        .summary { display: flex; justify-content: space-between; font-weight: bold; margin: 15px 0; font-size: 1.1rem; }
+        .btn-send { background: #25d366; color: #fff; border: none; padding: 15px; border-radius: 10px; width: 100%; font-size: 1.1rem; font-weight: bold; cursor: pointer; }
+        .cart-items { max-height: 90px; overflow-y: auto; margin-bottom: 10px; font-size: 0.85rem; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; }
+        .cart-item { display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .btn-remove { color: #ff4444; cursor: pointer; font-weight: bold; margin-left: 10px; }
+    </style>
+</head>
+<body>
+
+    <header class="header-pj">
+        <img src="logo.jpg" alt="Logo FF Distribuidora" class="logo-img" onclick="acessoGerente()">
+        <div class="studio-text">FF Distribuidora</div>
+    </header>
+
+    <div class="container" id="main-container">
+        <div class="tabs" id="tabs-container"></div>
+        <div class="grid" id="itens-container"></div>
+    </div>
+
+    <div class="footer-cart">
+        <div class="cart-items" id="lista-carrinho"></div>
+        <div class="input-group"><input type="text" id="nome" placeholder="Seu Nome completo"></div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="input-group"><input type="text" id="contato" placeholder="WhatsApp"></div>
+            <div class="input-group"><input type="text" id="endereco" placeholder="Endereço e Nº"></div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+            <div class="input-group">
+                <label>Bairro de Entrega</label>
+                <select id="bairro" onchange="atualizarTotal()">
+                    <option value="0">Selecione o Bairro...</option>
+                    <option value="10">Água Comprida - R$ 10,00</option>
+                    <option value="7">Ano Bom - R$ 7,00</option>
+                    <option value="8">Barbara - R$ 8,00</option>
+                    <option value="7">Boa Sorte - R$ 7,00</option>
+                    <option value="10">Boa Vista - R$ 10,00</option>
+                    <option value="8">Bocaininha - R$ 8,00</option>
+                    <option value="7">Centro - R$ 7,00</option>
+                    <option value="10">Colônia Santo Antônio - R$ 10,00</option>
+                    <option value="7">Cotiara - R$ 7,00</option>
+                    <option value="7">Estamparia - R$ 7,00</option>
+                    <option value="7">Goiabal - R$ 7,00</option>
+                    <option value="8">Jardim Boa Vista - R$ 8,00</option>
+                    <option value="6">Monte Cristo - R$ 6,00</option>
+                    <option value="7">Santa Clara - R$ 7,00</option>
+                    <option value="8">Santa Rosa - R$ 8,00</option>
+                    <option value="6">Sao Luiz - R$ 6,00</option>
+                    <option value="7">Sao Silvestre - R$ 7,00</option>
+                    <option value="8">Saudade - R$ 8,00</option>
+                    <option value="7">Verbo Divino - R$ 7,00</option>
+                    <option value="9">Vila Coringa - R$ 9,00</option>
+                    <option value="5">Vila Independencia - R$ 5,00</option>
+                    <option value="10">Vila Maria - R$ 10,00</option>
+                    <option value="10">Vila Nova - R$ 10,00</option>
+                    <option value="10">Vila Ursulino - R$ 10,00</option>
+                    <option value="10">Vista Alegre - R$ 10,00</option>
+                    <option value="4">Jardim america - R$ 4,00</option>
+                    <option value="7">Apóstolo Paulo - R$ 7,00</option>
+                    <option value="7">Abelhas - R$ 7,00</option>
+                    <option value="7">Roberto Silveira - R$ 7,00</option>
+                    <option value="7">Jardim Marajoara - R$ 7,00</option>
+                    <option value="6">São Pedro - R$ 6,00</option>
+                    <option value="7">Jardim Marilu - R$ 7,00</option>
+                    <option value="7">Santa Lúcia - R$ 7,00</option>
+                    <option value="10">Siderlândia - R$ 10,00</option>
+                    <option value="10">Cantagalo - R$ 10,00</option>
+                    <option value="10">São Domingos - R$ 10,00</option>
+                    <option value="10">Morada do Vale - R$ 10,00</option>
+                    <option value="9">Nossa Senhora de Fátima - R$ 9,00</option>
+                    <option value="10">Santa Maria - R$ 10,00</option>
+                    <option value="10">São Genaro - R$ 10,00</option>
+                    <option value="10">Km 4 - R$ 10,00</option>
+                    <option value="10">Santa Izabel - R$ 10,00</option>
+                    <option value="10">São Francisco de Assis - R$ 10,00</option>
+                    <option value="10">Getúlio Vargas - R$ 10,00</option>
+                    <option value="7">Vila Delgado - R$ 7,00</option>
+                    <option value="5">9 de abril - R$ 5,00</option>
+                    <option value="5">Metalurgicos - R$ 5,00</option>
+                    <option value="5">Santa Inês - R$ 5,00</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Forma de Pagamento</label>
+                <select id="pagamento" onchange="toggleTroco()">
+                    <option value="">Escolha...</option>
+                    <option value="Pix">Pix</option>
+                    <option value="Dinheiro">Dinheiro</option>
+                    <option value="cartao_credito">Cartão de Crédito</option>
+                    <option value="cartao_debito">Cartão de Débito</option>
+                </select>
+            </div>
+        </div>
+        <div class="input-group" id="campo-troco" style="display: none;"><input type="number" id="troco-para" placeholder="Troco para quanto?"></div>
+        <div class="summary"><span>Total:</span><span id="total-geral">R$ 0,00</span></div>
+        <button class="btn-send" onclick="enviarPedido()">Finalizar Pedido via WhatsApp</button>
+    </div>
+
+    <script src="dados.js"></script>
+    <script>
+        let carrinho = {};
+        let modoAdm = false;
+        let produtosPausados = JSON.parse(localStorage.getItem('ff_pausados')) || [];
+
+        function renderizarTabs() {
+            const container = document.getElementById('tabs-container');
+            container.innerHTML = "";
+            if (typeof categoriasCardapio !== 'undefined') {
+                categoriasCardapio.forEach((cat, index) => {
+                    const btn = document.createElement('button');
+                    btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
+                    btn.innerText = cat.nome;
+                    btn.onclick = () => mudarAba(cat.id, btn);
+                    container.appendChild(btn);
+                });
+                mudarAba(categoriasCardapio[0].id);
+            }
+        }
+
+        function mudarAba(id, btnAlvo) {
+            if(btnAlvo) {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btnAlvo.classList.add('active');
+            }
+            const container = document.getElementById('itens-container');
+            container.innerHTML = "";
+            const cat = categoriasCardapio.find(c => c.id === id);
+            
+            if (cat && cat.itens) {
+                cat.itens.forEach(item => {
+                    const itemIDStr = String(item.id);
+                    const estaPausado = produtosPausados.includes(itemIDStr);
+                    
+                    if (!modoAdm && estaPausado) return;
+
+                    const card = document.createElement('div');
+                    card.className = `card ${estaPausado ? 'pausado' : ''}`;
+                    
+                    card.innerHTML = `
+                        ${estaPausado ? '<span class="badge-pausado">ESGOTADO</span>' : ''}
+                        <img src="${item.img}" alt="${item.nome}" onerror="this.src='logo.jpg'">
+                        <h3>${item.nome}</h3>
+                        <p>${item.desc}</p>
+                        <div class="preco">R$ ${item.preco.toFixed(2).replace('.', ',')}</div>
+                        <div class="qtd-container">
+                            <input type="number" class="input-qtd" id="qtd-${item.id}" value="1" min="1">
+                            <button class="btn-add" onclick="addCarrinho('${item.id}', '${item.nome}', ${item.preco})">Adicionar</button>
+                        </div>
+                        <button class="btn-gerente" 
+                                style="background:${estaPausado ? '#25d366' : '#ff4444'}; color:#fff" 
+                                onclick="alternarEstoque('${item.id}')">
+                            ${estaPausado ? 'ATIVAR' : 'DESATIVAR'}
+                        </button>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        function alternarEstoque(id) {
+            const idStr = String(id);
+            if (produtosPausados.includes(idStr)) {
+                produtosPausados = produtosPausados.filter(p => p !== idStr);
+            } else {
+                produtosPausados.push(idStr);
+            }
+            localStorage.setItem('ff_pausados', JSON.stringify(produtosPausados));
+            const btnAtivo = document.querySelector('.tab-btn.active');
+            if(btnAtivo) {
+                const catAtual = categoriasCardapio.find(c => c.nome === btnAtivo.innerText);
+                if(catAtual) mudarAba(catAtual.id, btnAtivo);
+            }
+        }
+
+        function acessoGerente() {
+            if(prompt("Senha:") === "FF@2026dist") {
+                modoAdm = !modoAdm;
+                document.getElementById('main-container').classList.toggle('modo-adm', modoAdm);
+                renderizarTabs(); 
+            }
+        }
+
+        function addCarrinho(id, nome, preco) {
+            const qtdInput = document.getElementById(`qtd-${id}`);
+            const qtd = parseInt(qtdInput.value) || 1;
+            if(carrinho[id]) { carrinho[id].qtd += qtd; } 
+            else { carrinho[id] = { nome, preco, qtd }; }
+            qtdInput.value = 1;
+            atualizarTotal();
+        }
+
+        function removerItem(id) { delete carrinho[id]; atualizarTotal(); }
+
+        function atualizarTotal() {
+            const lista = document.getElementById('lista-carrinho');
+            const taxa = parseFloat(document.getElementById('bairro').value) || 0;
+            lista.innerHTML = ""; let sub = 0;
+            for (let id in carrinho) {
+                sub += carrinho[id].preco * carrinho[id].qtd;
+                const div = document.createElement('div');
+                div.className = 'cart-item';
+                div.innerHTML = `<span>${carrinho[id].qtd}x ${carrinho[id].nome}</span><span>R$ ${(carrinho[id].preco * carrinho[id].qtd).toFixed(2).replace('.', ',')} <span class="btn-remove" onclick="removerItem('${id}')">X</span></span>`;
+                lista.appendChild(div);
+            }
+            document.getElementById('total-geral').innerText = `R$ ${(sub + taxa).toFixed(2).replace('.', ',')}`;
+        }
+
+        function toggleTroco() { document.getElementById('campo-troco').style.display = document.getElementById('pagamento').value === "Dinheiro" ? "block" : "none"; }
+
+        function enviarPedido() {
+            const nome = document.getElementById('nome').value;
+            const bairroSelect = document.getElementById('bairro');
+            const bairroNome = bairroSelect.options[bairroSelect.selectedIndex].text;
+            const endereco = document.getElementById('endereco').value;
+            const taxa = parseFloat(bairroSelect.value);
+
+            if(!nome || Object.keys(carrinho).length === 0 || taxa === 0) { 
+                alert("Por favor, preencha seu nome, selecione o bairro e adicione itens!"); 
+                return; 
+            }
+
+            let msg = `*PEDIDO FF*\n\n*Cliente:* ${nome}\n*Endereço:* ${endereco}\n*Bairro:* ${bairroNome}\n\n*ITENS:*\n`;
+            let sub = 0;
+            for(let id in carrinho) {
+                msg += `${carrinho[id].qtd}x ${carrinho[id].nome} - R$ ${(carrinho[id].preco * carrinho[id].qtd).toFixed(2)}\n`;
+                sub += carrinho[id].preco * carrinho[id].qtd;
+            }
+            msg += `\n*Taxa de Entrega:* R$ ${taxa.toFixed(2)}`;
+            msg += `\n*TOTAL:* R$ ${(sub + taxa).toFixed(2)}`;
+            
+            window.open(`https://api.whatsapp.com/send?phone=5524981196037&text=${encodeURIComponent(msg)}`);
+        }
+
+        window.onload = renderizarTabs;
+    </script>
+</body>
+</html>
