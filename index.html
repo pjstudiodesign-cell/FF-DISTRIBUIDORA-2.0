@@ -13,31 +13,30 @@ function mudarAba(id, btnAlvo) {
     
     if (cat && cat.itens) {
         cat.itens.forEach(item => {
-            // 1. VERIFICAÇÃO DE SEÇÃO (TÍTULOS) - Ocupa a linha toda sem quebrar o grid
+            // 1. BLOCO CIRÚRGICO PARA TÍTULOS (SEÇÕES)
             if (item.secao === true) {
                 const divTitulo = document.createElement('div');
-                divTitulo.style.cssText = "grid-column: 1 / -1; width: 100%; background: #ffcc00; color: #000; padding: 12px; margin: 20px 0 10px 0; border-radius: 5px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 16px; clear: both;";
+                // Estilo que respeita o layout da imagem image_8c68f1.png
+                divTitulo.style.cssText = "grid-column: 1 / -1; width: 100%; background: #ffcc00; color: #000; padding: 12px; margin: 15px 0 10px 0; border-radius: 5px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);";
                 divTitulo.innerText = item.nome;
                 container.appendChild(divTitulo);
-                return; // Bloqueia a criação de card para este item
+                return; // Proteção: impede que o motor tente criar um card de produto aqui
             } 
 
-            // 2. MOTOR DE PRODUTO ORIGINAL (Fiel à image_8c68f1.png)
-            if (item.id) {
-                const card = document.createElement('div');
-                card.className = "card";
-                card.innerHTML = `
-                    <img src="${item.img}" alt="${item.nome}" onerror="this.src='logo.jpg'">
-                    <h3>${item.nome}</h3>
-                    <p>${item.desc}</p>
-                    <div class="preco">R$ ${item.preco.toFixed(2).replace('.', ',')}</div>
-                    <div class="qtd-container">
-                        <input type="number" class="input-qtd" id="qtd-${item.id}" value="1" min="1">
-                        <button class="btn-add" onclick="addCarrinho('${item.id}', '${item.nome}', ${item.preco})">Adicionar</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            }
+            // 2. MOTOR DE PRODUTO ORIGINAL (INTEGRIDADE TOTAL DAS IMAGENS E PREÇOS)
+            const card = document.createElement('div');
+            card.className = "card";
+            card.innerHTML = `
+                <img src="${item.img}" alt="${item.nome}" onerror="this.src='logo.jpg'">
+                <h3>${item.nome}</h3>
+                <p>${item.desc}</p>
+                <div class="preco">R$ ${item.preco.toFixed(2).replace('.', ',')}</div>
+                <div class="qtd-container">
+                    <input type="number" class="input-qtd" id="qtd-${item.id}" value="1" min="1">
+                    <button class="btn-add" onclick="addCarrinho('${item.id}', '${item.nome}', ${item.preco})">Adicionar</button>
+                </div>
+            `;
+            container.appendChild(card);
         });
     }
 }
