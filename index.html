@@ -1,4 +1,4 @@
-// MOTOR DE RENDERIZAÇÃO - LACRADO
+// MOTOR DE RENDERIZAÇÃO - LACRADO E INTEGRAL
 function mudarAba(id, btnAlvo) {
     if(btnAlvo) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -13,16 +13,18 @@ function mudarAba(id, btnAlvo) {
     
     if (cat && cat.itens) {
         cat.itens.forEach(item => {
-            // VERIFICAÇÃO DE SEÇÃO (TÍTULOS)
+            // 1. VERIFICAÇÃO CIRÚRGICA DE TÍTULO (SEÇÃO)
             if (item.secao === true) {
                 const divTitulo = document.createElement('div');
+                // Estilo que força o título a ocupar a linha toda e destaca o visual
                 divTitulo.style.cssText = "grid-column: 1 / -1; width: 100%; background: #ffcc00; color: #000; padding: 12px; margin: 15px 0 10px 0; border-radius: 5px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); clear: both;";
                 divTitulo.innerText = item.nome;
                 container.appendChild(divTitulo);
-                return; 
+                return; // Lacre: impede a criação de card de produto para este item
             } 
 
-            // MOTOR DE PRODUTO (MANUTENÇÃO DA INTEGRIDADE)
+            // 2. MOTOR DE PRODUTO ORIGINAL (MANUTENÇÃO DA INTEGRIDADE)
+            // Preserva imagens e funcionalidades da image_8c68f1.png
             const card = document.createElement('div');
             card.className = "card";
             card.innerHTML = `
