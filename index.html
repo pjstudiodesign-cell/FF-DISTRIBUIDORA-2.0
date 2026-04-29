@@ -1,4 +1,4 @@
-// MOTOR DE RENDERIZAÇÃO INTEGRAL - BLINDADO CONTRA ERROS
+// MOTOR DE RENDERIZAÇÃO INTEGRAL - LACRADO CONTRA ERROS
 function mudarAba(id, btnAlvo) {
     if(btnAlvo) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -13,17 +13,18 @@ function mudarAba(id, btnAlvo) {
     
     if (cat && cat.itens) {
         cat.itens.forEach(item => {
-            // LACRE 1: SEÇÃO (TÍTULO) - Executa primeiro e isolado
+            // LACRE CIRÚRGICO: SE FOR TÍTULO/SEÇÃO
             if (item.secao === true) {
                 const divTitulo = document.createElement('div');
-                // Estilo inline com !important para garantir que apareça independente do CSS
-                divTitulo.style.cssText = "grid-column: 1 / -1 !important; width: 100% !important; background: #ffcc00 !important; color: #000 !important; padding: 12px !important; margin: 15px 0 10px 0 !important; border-radius: 5px !important; font-weight: bold !important; text-align: center !important; text-transform: uppercase !important; font-size: 15px !important; display: block !important; clear: both !important;";
+                // Estilo forçado para garantir que a barra amarela apareça
+                divTitulo.style.cssText = "grid-column: 1 / -1 !important; width: 100% !important; background: #ffcc00 !important; color: #000 !important; padding: 12px !important; margin: 15px 0 10px 0 !important; border-radius: 5px !important; font-weight: bold !important; text-align: center !important; text-transform: uppercase !important; font-size: 14px !important; display: block !important; clear: both !important;";
                 divTitulo.innerText = item.nome;
                 container.appendChild(divTitulo);
-                return; // INTERROMPE AQUI: Não deixa o código tentar criar um card de produto
+                return; // PARA AQUI: Impede que o código tente ler preço ou imagem deste item
             } 
 
-            // LACRE 2: PRODUTO (FF DISTRIBUIDORA) - Só executa se não for título
+            // MOTOR DE PRODUTO (FF DISTRIBUIDORA)
+            // Só entra aqui se tiver um ID, protegendo contra erros de 'undefined'
             if (item.id) {
                 const card = document.createElement('div');
                 card.className = "card";
