@@ -1,213 +1,38 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FF DISTRIBUIDORA - Cardápio</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        :root { --primary: #ffcc00; --secondary: #000; --bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #000 100%); --card-bg: rgba(255, 255, 255, 0.05); }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
-        body { background: var(--bg-gradient); color: #fff; min-height: 100vh; padding-bottom: 100px; }
-        header { text-align: center; padding: 30px 20px; background: rgba(0,0,0,0.8); border-bottom: 3px solid var(--primary); position: sticky; top: 0; z-index: 1000; }
-        .logo { width: 120px; height: 120px; border-radius: 50%; border: 3px solid var(--primary); margin-bottom: 15px; object-fit: cover; }
-        .tabs { display: flex; overflow-x: auto; gap: 10px; padding: 15px; background: #111; scrollbar-width: none; }
-        .tabs::-webkit-scrollbar { display: none; }
-        .tab-btn { padding: 10px 25px; background: #222; border: 1px solid #444; color: #fff; border-radius: 25px; cursor: pointer; white-space: nowrap; transition: 0.3s; }
-        .tab-btn.active { background: var(--primary); color: #000; font-weight: bold; border-color: var(--primary); }
-        .container { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 15px; padding: 20px; }
-        
-        /* ESTILO DO DIVISOR (LACRADO) */
-        .secao-titulo { grid-column: 1 / -1; width: 100%; background: var(--primary); color: #000; padding: 12px; margin: 20px 0 10px 0; border-radius: 8px; font-weight: 900; text-align: center; text-transform: uppercase; font-size: 1rem; box-shadow: 0 4px 10px rgba(0,0,0,0.5); display: block; clear: both; }
-
-        .card { background: var(--card-bg); border: 1px solid #333; border-radius: 15px; padding: 15px; text-align: center; position: relative; transition: 0.3s; }
-        .card.pausado { opacity: 0.5; filter: grayscale(1); }
-        .badge-pausado { position: absolute; top: 10px; left: 10px; background: #ff4444; color: white; padding: 5px 10px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; z-index: 10; }
-        .card img { width: 100%; height: 140px; object-fit: contain; margin-bottom: 10px; }
-        .card h3 { font-size: 1rem; margin-bottom: 5px; color: var(--primary); }
-        .card p { font-size: 0.8rem; color: #ccc; margin-bottom: 10px; height: 32px; overflow: hidden; }
-        .card .preco { font-size: 1.2rem; font-weight: bold; color: #fff; margin-bottom: 10px; }
-        .qtd-container { display: flex; gap: 5px; justify-content: center; margin-bottom: 10px; }
-        .input-qtd { width: 50px; padding: 8px; border-radius: 5px; border: none; text-align: center; background: #fff; color: #000; }
-        .btn-add { background: var(--primary); color: #000; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; }
-        .btn-gerente { display: none; margin-top: 10px; width: 100%; padding: 8px; border: none; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        .cart-footer { position: fixed; bottom: 0; width: 100%; background: #000; border-top: 2px solid var(--primary); padding: 15px; z-index: 2000; }
-        .cart-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .btn-checkout { background: #25d366; color: #fff; border: none; padding: 12px; border-radius: 10px; width: 100%; font-weight: bold; font-size: 1.1rem; cursor: pointer; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 3000; padding: 20px; overflow-y: auto; }
-        .modal-content { background: #222; padding: 25px; border-radius: 20px; max-width: 500px; margin: 20px auto; border: 1px solid var(--primary); }
-        .btn-adm { position: absolute; top: 20px; right: 20px; background: transparent; border: 1px solid #444; color: #444; padding: 5px 10px; border-radius: 5px; font-size: 0.7rem; }
-    </style>
-</head>
-<body>
-    <button class="btn-adm" onclick="acessoGerente()">ADM</button>
-    <header>
-        <img src="logo.jpg" class="logo" alt="FF Distribuidora">
-        <h1>FF DISTRIBUIDORA</h1>
-        <p style="color: var(--primary); font-size: 0.9rem;">O melhor preço da região!</p>
-    </header>
-    <div class="tabs" id="tabs-container"></div>
-    <div class="container" id="itens-container"></div>
-    <div class="cart-footer">
-        <div class="cart-info">
-            <span>Itens: <span id="cart-count">0</span></span>
-            <span style="color: var(--primary); font-weight: bold;">Total: R$ <span id="cart-total">0,00</span></span>
-        </div>
-        <button class="btn-checkout" onclick="abrirModal()">
-            <i class="fab fa-whatsapp"></i> FINALIZAR PEDIDO
-        </button>
-    </div>
-    <div id="modal-pedido" class="modal">
-        <div class="modal-content">
-            <h2>Finalizar Pedido</h2>
-            <input type="text" id="nome-cliente" placeholder="Seu Nome" style="width:100%; padding:10px; margin-bottom:10px;">
-            <input type="text" id="endereco-cliente" placeholder="Endereço Completo" style="width:100%; padding:10px; margin-bottom:10px;">
-            <label>Bairro:</label>
-            <select id="bairro-cliente" onchange="atualizarTotal()" style="width:100%; padding:10px; margin-bottom:10px;"></select>
-            <label>Pagamento:</label>
-            <select id="pagamento-cliente" style="width:100%; padding:10px; margin-bottom:10px;">
-                <option value="Pix">Pix</option>
-                <option value="Dinheiro">Dinheiro</option>
-                <option value="Cartão">Cartão</option>
-            </select>
-            <div style="background:#111; padding:15px; border-radius:10px;">
-                <p>Produtos: R$ <span id="modal-subtotal">0,00</span></p>
-                <p>Taxa: R$ <span id="modal-taxa">0,00</span></p>
-                <p style="font-size:1.2rem; color:var(--primary); font-weight:bold;">Total: R$ <span id="modal-total-geral">0,00</span></p>
-            </div>
-            <button class="btn-checkout" onclick="enviarPedido()" style="margin-top:15px;">CONFIRMAR</button>
-            <button onclick="fecharModal()" style="width:100%; background:transparent; color:#ff4444; border:none; margin-top:10px;">Cancelar</button>
-        </div>
-    </div>
-
-    <script src="dados.js"></script>
-    <script>
-        let carrinho = [];
-        let modoAdm = false;
-        let produtosPausados = JSON.parse(localStorage.getItem('ff_pausados')) || [];
-
-        function inicializar() {
-            const tabsContainer = document.getElementById('tabs-container');
-            categoriasCardapio.forEach((cat, index) => {
-                const btn = document.createElement('button');
-                btn.className = `tab-btn ${index === 0 ? 'active' : ''}`;
-                btn.innerText = cat.nome;
-                btn.onclick = (e) => mudarAba(cat.id, e.target);
-                tabsContainer.appendChild(btn);
-            });
-            const selectBairro = document.getElementById('bairro-cliente');
-            bairrosEntrega.forEach(b => {
-                const opt = document.createElement('option');
-                opt.value = b.nome;
-                opt.innerText = `${b.nome} (R$ ${b.taxa.toFixed(2)})`;
-                selectBairro.appendChild(opt);
-            });
-            mudarAba(categoriasCardapio[0].id);
-        }
-
-        function mudarAba(id, btnAlvo) {
-            if(btnAlvo) {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                btnAlvo.classList.add('active');
+// FUNÇÃO DE RENDERIZAÇÃO INTEGRAL E LACRADA
+function mudarAba(id, btnAlvo) {
+    if(btnAlvo) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        btnAlvo.classList.add('active');
+    }
+    const container = document.getElementById('itens-container');
+    container.innerHTML = "";
+    const cat = categoriasCardapio.find(c => c.id === id);
+    
+    if (cat && cat.itens) {
+        cat.itens.forEach(item => {
+            // VERIFICAÇÃO DE SEGURANÇA: SE FOR TÍTULO DE SEÇÃO
+            if (item.secao) {
+                const divTitulo = document.createElement('div');
+                divTitulo.style.cssText = "grid-column: 1 / -1; width: 100%; background: #ffcc00; color: #000; padding: 12px; margin: 20px 0 10px 0; border-radius: 5px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 15px; letter-spacing: 1px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);";
+                divTitulo.innerText = item.nome;
+                container.appendChild(divTitulo);
+                return; // INTERROMPE E PULA PARA O PRÓXIMO PRODUTO
             }
-            const container = document.getElementById('itens-container');
-            container.innerHTML = "";
-            const cat = categoriasCardapio.find(c => c.id === id);
-            
-            if (cat && cat.itens) {
-                cat.itens.forEach(item => {
-                    // LOGICA DE TÍTULO (LACRADA)
-                    if (item.tipo === "titulo") {
-                        const div = document.createElement('div');
-                        div.className = 'secao-titulo';
-                        div.innerText = item.nome;
-                        container.appendChild(div);
-                        return;
-                    }
 
-                    // LOGICA DE PRODUTO (PRESERVADA MILIMETRICAMENTE)
-                    const itemIDStr = String(item.id);
-                    const estaPausado = produtosPausados.includes(itemIDStr);
-                    if (!modoAdm && estaPausado) return;
-
-                    const card = document.createElement('div');
-                    card.className = `card ${estaPausado ? 'pausado' : ''}`;
-                    card.innerHTML = `
-                        ${estaPausado ? '<span class="badge-pausado">ESGOTADO</span>' : ''}
-                        <img src="${item.img}" alt="${item.nome}" onerror="this.src='logo.jpg'">
-                        <h3>${item.nome}</h3>
-                        <p>${item.desc}</p>
-                        <div class="preco">R$ ${item.preco.toFixed(2).replace('.', ',')}</div>
-                        <div class="qtd-container">
-                            <input type="number" class="input-qtd" id="qtd-${item.id}" value="1" min="1">
-                            <button class="btn-add" onclick="addCarrinho('${item.id}', '${item.nome}', ${item.preco})">Adicionar</button>
-                        </div>
-                        <button class="btn-gerente" style="display: ${modoAdm ? 'block' : 'none'}; background:${estaPausado ? '#25d366' : '#ff4444'}; color:#fff" onclick="alternarEstoque('${item.id}')">
-                            ${estaPausado ? 'ATIVAR' : 'DESATIVAR'}
-                        </button>
-                    `;
-                    container.appendChild(card);
-                });
-            }
-        }
-
-        function addCarrinho(id, nome, preco) {
-            const qtdInput = document.getElementById(`qtd-${id}`);
-            const qtd = parseInt(qtdInput.value);
-            if (qtd < 1) return;
-            const itemExistente = carrinho.find(i => i.id === id);
-            if (itemExistente) { itemExistente.qtd += qtd; } else { carrinho.push({ id, nome, preco, qtd }); }
-            atualizarCarrinho();
-            const btn = event.target;
-            btn.innerText = "OK!";
-            setTimeout(() => { btn.innerText = "Adicionar"; }, 800);
-        }
-
-        function atualizarCarrinho() {
-            const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
-            const count = carrinho.reduce((acc, i) => acc + i.qtd, 0);
-            document.getElementById('cart-total').innerText = total.toFixed(2).replace('.', ',');
-            document.getElementById('cart-count').innerText = count;
-        }
-
-        function abrirModal() { if (carrinho.length === 0) return alert("Carrinho vazio!"); document.getElementById('modal-pedido').style.display = 'block'; atualizarTotal(); }
-        function fecharModal() { document.getElementById('modal-pedido').style.display = 'none'; }
-        function atualizarTotal() {
-            const sub = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
-            const bNome = document.getElementById('bairro-cliente').value;
-            const b = bairrosEntrega.find(x => x.nome === bNome);
-            const taxa = b ? b.taxa : 0;
-            document.getElementById('modal-subtotal').innerText = sub.toFixed(2).replace('.', ',');
-            document.getElementById('modal-taxa').innerText = taxa.toFixed(2).replace('.', ',');
-            document.getElementById('modal-total-geral').innerText = (sub + taxa).toFixed(2).replace('.', ',');
-        }
-
-        function enviarPedido() {
-            const n = document.getElementById('nome-cliente').value;
-            const e = document.getElementById('endereco-cliente').value;
-            const b = document.getElementById('bairro-cliente').value;
-            const p = document.getElementById('pagamento-cliente').value;
-            if (!n || !e) return alert("Preencha tudo!");
-            let msg = `*PEDIDO - FF DISTRIBUIDORA*\n\n*Cliente:* ${n}\n*End:* ${e}\n*Bairro:* ${b}\n*Pgto:* ${p}\n\n*ITENS:*\n`;
-            carrinho.forEach(i => { msg += `- ${i.qtd}x ${i.nome} (R$ ${(i.preco * i.qtd).toFixed(2)})\n`; });
-            const sub = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
-            const taxa = bairrosEntrega.find(x => x.nome === b).taxa;
-            msg += `\n*Total:* R$ ${(sub + taxa).toFixed(2)}`;
-            window.open(`https://wa.me/5524981196037?text=${encodeURIComponent(msg)}`);
-        }
-
-        function acessoGerente() {
-            if (prompt("Senha ADM:") === "FF@2026dist") { modoAdm = !modoAdm; alert("Modo ADM: " + modoAdm); mudarAba(categoriasCardapio[0].id); }
-        }
-
-        function alternarEstoque(id) {
-            const idS = String(id);
-            const idx = produtosPausados.indexOf(idS);
-            if (idx > -1) { produtosPausados.splice(idx, 1); } else { produtosPausados.push(idS); }
-            localStorage.setItem('ff_pausados', JSON.stringify(produtosPausados));
-            mudarAba(categoriasCardapio.find(c => c.itens.some(i => i.id == id)).id);
-        }
-        window.onload = inicializar;
-    </script>
-</body>
-</html>
+            // RENDERIZAÇÃO DO CARD DE PRODUTO (IMAGEM image_8c68f1.png)
+            const card = document.createElement('div');
+            card.className = "card";
+            card.innerHTML = `
+                <img src="${item.img}" alt="${item.nome}" onerror="this.src='logo.jpg'">
+                <h3>${item.nome}</h3>
+                <p>${item.desc}</p>
+                <div class="preco">R$ ${item.preco.toFixed(2).replace('.', ',')}</div>
+                <div class="qtd-container">
+                    <input type="number" class="input-qtd" id="qtd-${item.id}" value="1" min="1">
+                    <button class="btn-add" onclick="addCarrinho('${item.id}', '${item.nome}', ${item.preco})">Adicionar</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+}
