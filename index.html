@@ -1,4 +1,4 @@
-// MOTOR DE RENDERIZAÇÃO - INTEGRAL E LACRADO
+// MOTOR DE RENDERIZAÇÃO - LACRADO E INTEGRAL
 function mudarAba(id, btnAlvo) {
     if(btnAlvo) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -13,17 +13,17 @@ function mudarAba(id, btnAlvo) {
     
     if (cat && cat.itens) {
         cat.itens.forEach(item => {
-            // BLOCO DE SEGURANÇA MÁXIMA PARA TÍTULOS
+            // LACRE DE SEGURANÇA: IDENTIFICAÇÃO DE SEÇÃO
             if (item.secao === true) {
                 const divTitulo = document.createElement('div');
-                // Estilo reforçado com !important para garantir visibilidade absoluta
-                divTitulo.style.cssText = "grid-column: 1 / -1 !important; width: 100% !important; display: block !important; background: #ffcc00 !important; color: #000 !important; padding: 15px !important; margin: 10px 0 !important; border-radius: 5px !important; font-weight: bold !important; text-align: center !important; text-transform: uppercase !important; font-size: 16px !important; clear: both !important;";
+                // O estilo abaixo força o título a aparecer por cima de qualquer erro de CSS
+                divTitulo.style.cssText = "grid-column: 1 / -1 !important; width: 100% !important; display: block !important; background: #ffcc00 !important; color: #000 !important; padding: 15px !important; margin: 10px 0 !important; border-radius: 5px !important; font-weight: bold !important; text-align: center !important; text-transform: uppercase !important; font-size: 16px !important; clear: both !important; visibility: visible !important; opacity: 1 !important;";
                 divTitulo.innerText = item.nome;
                 container.appendChild(divTitulo);
-                return; // Lacre: impede que o motor tente criar um card de produto aqui
+                return; // Pula para o próximo item
             } 
 
-            // MOTOR DE PRODUTO ORIGINAL - INTEGRIDADE TOTAL PRESERVADA
+            // MOTOR DE PRODUTO ORIGINAL (FF DISTRIBUIDORA)
             const card = document.createElement('div');
             card.className = "card";
             card.innerHTML = `
