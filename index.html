@@ -1,4 +1,4 @@
-// MOTOR DE RENDERIZAÇÃO - LACRADO E INTEGRAL
+// MOTOR DE RENDERIZAÇÃO - INTEGRAL E LACRADO
 function mudarAba(id, btnAlvo) {
     if(btnAlvo) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -13,18 +13,17 @@ function mudarAba(id, btnAlvo) {
     
     if (cat && cat.itens) {
         cat.itens.forEach(item => {
-            // 1. VERIFICAÇÃO CIRÚRGICA DE TÍTULO (SEÇÃO)
+            // BLOCO DE SEGURANÇA MÁXIMA PARA TÍTULOS
             if (item.secao === true) {
                 const divTitulo = document.createElement('div');
-                // Estilo que força o título a ocupar a linha toda e destaca o visual
-                divTitulo.style.cssText = "grid-column: 1 / -1; width: 100%; background: #ffcc00; color: #000; padding: 12px; margin: 15px 0 10px 0; border-radius: 5px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); clear: both;";
+                // Estilo reforçado com !important para garantir visibilidade absoluta
+                divTitulo.style.cssText = "grid-column: 1 / -1 !important; width: 100% !important; display: block !important; background: #ffcc00 !important; color: #000 !important; padding: 15px !important; margin: 10px 0 !important; border-radius: 5px !important; font-weight: bold !important; text-align: center !important; text-transform: uppercase !important; font-size: 16px !important; clear: both !important;";
                 divTitulo.innerText = item.nome;
                 container.appendChild(divTitulo);
-                return; // Lacre: impede a criação de card de produto para este item
+                return; // Lacre: impede que o motor tente criar um card de produto aqui
             } 
 
-            // 2. MOTOR DE PRODUTO ORIGINAL (MANUTENÇÃO DA INTEGRIDADE)
-            // Preserva imagens e funcionalidades da image_8c68f1.png
+            // MOTOR DE PRODUTO ORIGINAL - INTEGRIDADE TOTAL PRESERVADA
             const card = document.createElement('div');
             card.className = "card";
             card.innerHTML = `
