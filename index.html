@@ -1,38 +1,43 @@
-// FUNÇÃO DE RENDERIZAÇÃO INTEGRAL E LACRADA
+// MOTOR DE RENDERIZAÇÃO INTEGRAL - LACRADO E BLINDADO
 function mudarAba(id, btnAlvo) {
     if(btnAlvo) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         btnAlvo.classList.add('active');
     }
+    
     const container = document.getElementById('itens-container');
+    if (!container) return; 
+    
     container.innerHTML = "";
     const cat = categoriasCardapio.find(c => c.id === id);
     
     if (cat && cat.itens) {
         cat.itens.forEach(item => {
-            // VERIFICAÇÃO DE SEGURANÇA: SE FOR TÍTULO DE SEÇÃO
-            if (item.secao) {
+            // 1. VERIFICAÇÃO DE SEÇÃO (TÍTULOS) - Ocupa a linha toda sem quebrar o grid
+            if (item.secao === true) {
                 const divTitulo = document.createElement('div');
-                divTitulo.style.cssText = "grid-column: 1 / -1; width: 100%; background: #ffcc00; color: #000; padding: 12px; margin: 20px 0 10px 0; border-radius: 5px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 15px; letter-spacing: 1px; box-shadow: 0 2px 4px rgba(0,0,0,0.2);";
+                divTitulo.style.cssText = "grid-column: 1 / -1; width: 100%; background: #ffcc00; color: #000; padding: 12px; margin: 20px 0 10px 0; border-radius: 5px; font-weight: bold; text-align: center; text-transform: uppercase; font-size: 16px; clear: both;";
                 divTitulo.innerText = item.nome;
                 container.appendChild(divTitulo);
-                return; // INTERROMPE E PULA PARA O PRÓXIMO PRODUTO
-            }
+                return; // Bloqueia a criação de card para este item
+            } 
 
-            // RENDERIZAÇÃO DO CARD DE PRODUTO (IMAGEM image_8c68f1.png)
-            const card = document.createElement('div');
-            card.className = "card";
-            card.innerHTML = `
-                <img src="${item.img}" alt="${item.nome}" onerror="this.src='logo.jpg'">
-                <h3>${item.nome}</h3>
-                <p>${item.desc}</p>
-                <div class="preco">R$ ${item.preco.toFixed(2).replace('.', ',')}</div>
-                <div class="qtd-container">
-                    <input type="number" class="input-qtd" id="qtd-${item.id}" value="1" min="1">
-                    <button class="btn-add" onclick="addCarrinho('${item.id}', '${item.nome}', ${item.preco})">Adicionar</button>
-                </div>
-            `;
-            container.appendChild(card);
+            // 2. MOTOR DE PRODUTO ORIGINAL (Fiel à image_8c68f1.png)
+            if (item.id) {
+                const card = document.createElement('div');
+                card.className = "card";
+                card.innerHTML = `
+                    <img src="${item.img}" alt="${item.nome}" onerror="this.src='logo.jpg'">
+                    <h3>${item.nome}</h3>
+                    <p>${item.desc}</p>
+                    <div class="preco">R$ ${item.preco.toFixed(2).replace('.', ',')}</div>
+                    <div class="qtd-container">
+                        <input type="number" class="input-qtd" id="qtd-${item.id}" value="1" min="1">
+                        <button class="btn-add" onclick="addCarrinho('${item.id}', '${item.nome}', ${item.preco})">Adicionar</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
         });
     }
 }
