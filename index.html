@@ -1,4 +1,4 @@
-// MOTOR DE RENDERIZAÇÃO - LACRADO E INTEGRAL
+// MOTOR DE RENDERIZAÇÃO INTEGRAL - BLINDADO CONTRA ERROS
 function mudarAba(id, btnAlvo) {
     if(btnAlvo) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -13,30 +13,32 @@ function mudarAba(id, btnAlvo) {
     
     if (cat && cat.itens) {
         cat.itens.forEach(item => {
-            // LACRE DE SEGURANÇA: IDENTIFICAÇÃO DE SEÇÃO
+            // LACRE 1: SEÇÃO (TÍTULO) - Executa primeiro e isolado
             if (item.secao === true) {
                 const divTitulo = document.createElement('div');
-                // O estilo abaixo força o título a aparecer por cima de qualquer erro de CSS
-                divTitulo.style.cssText = "grid-column: 1 / -1 !important; width: 100% !important; display: block !important; background: #ffcc00 !important; color: #000 !important; padding: 15px !important; margin: 10px 0 !important; border-radius: 5px !important; font-weight: bold !important; text-align: center !important; text-transform: uppercase !important; font-size: 16px !important; clear: both !important; visibility: visible !important; opacity: 1 !important;";
+                // Estilo inline com !important para garantir que apareça independente do CSS
+                divTitulo.style.cssText = "grid-column: 1 / -1 !important; width: 100% !important; background: #ffcc00 !important; color: #000 !important; padding: 12px !important; margin: 15px 0 10px 0 !important; border-radius: 5px !important; font-weight: bold !important; text-align: center !important; text-transform: uppercase !important; font-size: 15px !important; display: block !important; clear: both !important;";
                 divTitulo.innerText = item.nome;
                 container.appendChild(divTitulo);
-                return; // Pula para o próximo item
+                return; // INTERROMPE AQUI: Não deixa o código tentar criar um card de produto
             } 
 
-            // MOTOR DE PRODUTO ORIGINAL (FF DISTRIBUIDORA)
-            const card = document.createElement('div');
-            card.className = "card";
-            card.innerHTML = `
-                <img src="${item.img}" alt="${item.nome}" onerror="this.src='logo.jpg'">
-                <h3>${item.nome}</h3>
-                <p>${item.desc}</p>
-                <div class="preco">R$ ${item.preco.toFixed(2).replace('.', ',')}</div>
-                <div class="qtd-container">
-                    <input type="number" class="input-qtd" id="qtd-${item.id}" value="1" min="1">
-                    <button class="btn-add" onclick="addCarrinho('${item.id}', '${item.nome}', ${item.preco})">Adicionar</button>
-                </div>
-            `;
-            container.appendChild(card);
+            // LACRE 2: PRODUTO (FF DISTRIBUIDORA) - Só executa se não for título
+            if (item.id) {
+                const card = document.createElement('div');
+                card.className = "card";
+                card.innerHTML = `
+                    <img src="${item.img}" alt="${item.nome}" onerror="this.src='logo.jpg'">
+                    <h3>${item.nome}</h3>
+                    <p>${item.desc}</p>
+                    <div class="preco">R$ ${item.preco.toFixed(2).replace('.', ',')}</div>
+                    <div class="qtd-container">
+                        <input type="number" class="input-qtd" id="qtd-${item.id}" value="1" min="1">
+                        <button class="btn-add" onclick="addCarrinho('${item.id}', '${item.nome}', ${item.preco})">Adicionar</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            }
         });
     }
 }
