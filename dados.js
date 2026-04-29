@@ -27,3 +27,10 @@ const categoriasCardapio = [
         ]
     }
 ];
+
+const bairrosEntrega = [
+    { nome: "Centro", taxa: 5.00 },
+    { nome: "Ano Bom", taxa: 6.00 },
+    { nome: "Vila Nova", taxa: 7.00 },
+    { nome: "Retiro", taxa: 12.00 }
+];
