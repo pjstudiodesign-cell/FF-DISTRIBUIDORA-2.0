@@ -25,14 +25,6 @@ const categoriasCardapio = [
             { id: 54, nome: "Budweiser Lata 350ml", preco: 5.00, desc: "Cerveja Budweiser Lata 350ml", img: "cerveja/bud_350.jpg" },
             { id: 55, nome: "Coronita 210ml", preco: 6.00, desc: "Cerveja Corona Extra 210ml", img: "cerveja/coronita.jpg" }
         ]
-    },
-    {
-        id: "combos",
-        nome: "Combos",
-        itens: [
-            { id: 301, nome: "Combo Cavalo Branco", preco: 110.00, desc: "1 Cavalo Branco + 5 Energéticos 250ml + Gelo", img: "combos/combo_cavalo_branco.jpg" },
-            { id: 307, nome: "Combo Smirnoff", preco: 80.00, desc: "1 Smirnoff + 1 Suco 1L + Gelo", img: "combos/combo_smirnoff.jpg" }
-        ]
     }
 ];
 
