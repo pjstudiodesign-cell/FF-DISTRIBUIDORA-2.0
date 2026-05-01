@@ -310,8 +310,16 @@
                 msg += `${carrinho[id].qtd}x ${carrinho[id].nome} - R$ ${(carrinho[id].preco * carrinho[id].qtd).toFixed(2)}\n`;
                 sub += carrinho[id].preco * carrinho[id].qtd;
             }
+            const pagamento = document.getElementById('pagamento').value;
+            if (!pagamento) { alert('Por favor, selecione a forma de pagamento!'); return; }
+            const pagamentoTexto = pagamento === 'cartao_credito' ? 'Cartão de Crédito' : pagamento === 'cartao_debito' ? 'Cartão de Débito' : pagamento;
+            const trocoPara = parseFloat(document.getElementById('troco-para').value) || 0;
+            const total = sub + taxa;
+
             msg += `\n*Taxa de Entrega:* R$ ${taxa.toFixed(2)}`;
-            msg += `\n*TOTAL:* R$ ${(sub + taxa).toFixed(2)}`;
+            msg += `\n*TOTAL:* R$ ${total.toFixed(2)}`;
+            msg += `\n*Pagamento:* ${pagamentoTexto}`;
+            if (pagamento === 'Dinheiro' && trocoPara > 0) msg += `\n*Troco para:* R$ ${trocoPara.toFixed(2)} *(Troco: R$ ${(trocoPara - total).toFixed(2)})*`;
             
             window.open(`https://api.whatsapp.com/send?phone=5524981196037&text=${encodeURIComponent(msg)}`);
         }
