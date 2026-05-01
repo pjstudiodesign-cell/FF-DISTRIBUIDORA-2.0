@@ -304,7 +304,7 @@
                 return; 
             }
 
-            let msg = `*PEDIDO FF*\n\n*Cliente:* ${nome}\n*Endereço:* ${endereco}\n*Bairro:* ${bairroNome}\n\n*ITENS:*\n`;
+            let msg = `*PEDIDO FF DISTRIBUIDORA*\n\n*Cliente:* ${nome}\n*Endereço:* ${endereco}\n*Bairro:* ${bairroNome}\n\n*ITENS:*\n`;
             let sub = 0;
             for(let id in carrinho) {
                 msg += `${carrinho[id].qtd}x ${carrinho[id].nome} - R$ ${(carrinho[id].preco * carrinho[id].qtd).toFixed(2)}\n`;
